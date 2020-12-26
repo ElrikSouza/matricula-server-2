@@ -10,7 +10,7 @@ create table student(
     name varchar(70) not null
 );
 
-create table student_confirmation_code(
+create table student_verification_code(
     _id serial primary key,
     student_id int not null references student(_id) on delete cascade,
     expiration_date not null timestamptz
