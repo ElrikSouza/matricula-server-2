@@ -1,6 +1,6 @@
 create table user_account(
     _id serial primary key,
-    student_id int not null references student(_id) on delete cascade,
+    student_id int unique not null references student(_id) on delete cascade,
     email varchar(254) unique,
     password char(60)
 );
