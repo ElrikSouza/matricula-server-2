@@ -27,7 +27,8 @@ POST /auth/signup
 	// 8 =< len =< 70
 	password: string,
 	studentId: number,
-	verificationCode: number;
+	// len = 6
+	verificationCode: string;
 }
 ```
 

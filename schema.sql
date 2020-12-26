@@ -13,6 +13,7 @@ create table student(
 create table student_verification_code(
     _id serial primary key,
     student_id int not null references student(_id) on delete cascade,
+    code char(6) not null,
     expiration_date not null timestamptz
 );
 
