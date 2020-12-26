@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import * as Env from './env';
 import { fastifyHelmet } from 'fastify-helmet';
 import compress from 'fastify-compress';
+import { types } from 'pg';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -14,6 +15,8 @@ async function bootstrap() {
     new FastifyAdapter(),
     { cors: true },
   );
+
+  types.setTypeParser(20, Number.parseInt);
 
   app.register(fastifyHelmet);
   app.register(compress, { encodings: ['gzip', 'deflate'] });
