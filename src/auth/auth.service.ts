@@ -41,12 +41,12 @@ export class AuthService {
   async logIn(logInInfo: LogInDto) {
     const userAccount = await this.getUserAccountIfCredentialsMatch(logInInfo);
 
-    const accessToken = this.jwtService.signAsync({
+    const accessToken = await this.jwtService.signAsync({
       studentId: userAccount.student_id,
       userId: userAccount._id,
     });
 
-    return accessToken;
+    return { accessToken };
   }
 
   async signUp(signUpInfo: SignUpDto) {
