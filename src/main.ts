@@ -8,6 +8,7 @@ import * as Env from './env';
 import { fastifyHelmet } from 'fastify-helmet';
 import compress from 'fastify-compress';
 import { types } from 'pg';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -17,6 +18,7 @@ async function bootstrap() {
   );
 
   types.setTypeParser(20, Number.parseInt);
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   app.register(fastifyHelmet);
   app.register(compress, { encodings: ['gzip', 'deflate'] });
