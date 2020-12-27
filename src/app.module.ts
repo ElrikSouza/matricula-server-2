@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { StudentVerificationCodeModule } from './student-verification-code/student-verification-code.module';
 import { UserAccountModule } from './user-account/user-account.module';
+import { CoursesModule } from './courses/courses.module';
 import * as Env from './env';
 
 @Module({
@@ -15,6 +16,7 @@ import * as Env from './env';
       url: Env.DB_CONN,
       autoLoadEntities: true,
     }),
+    CoursesModule,
   ],
 })
 export class AppModule {}
