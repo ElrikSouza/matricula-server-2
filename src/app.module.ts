@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { StudentVerificationCodeModule } from './student-verification-code/student-verification-code.module';
 import { UserAccountModule } from './user-account/user-account.module';
 import { CoursesModule } from './courses/courses.module';
+import { StudentModule } from './student/student.module';
 import * as Env from './env';
 
 @Module({
@@ -17,6 +18,7 @@ import * as Env from './env';
       autoLoadEntities: true,
     }),
     CoursesModule,
+    StudentModule,
   ],
 })
 export class AppModule {}

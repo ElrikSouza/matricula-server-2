@@ -27,4 +27,26 @@ export class CoursesService {
 
     return cachedResult;
   }
+
+  async getCompletedCoursesByStudendId(studentId: number) {
+    const cachedResult = await this.cacheManager.get(`courses#${studentId}`);
+
+    if (!cachedResult) {
+      const { coursecodes: courseCodes } = await this.entityManager.query(`
+        select
+        array_agg(course.code) as courseCodes from course course
+        inner join course_prerequisite course_p on course_p.course_id = course._id;
+      `);
+
+      await this.cacheManager.set(
+        `courses#${studentId}`,
+        { courseCodes },
+        { ttl: 300000 },
+      );
+
+      return { courseCodes };
+    }
+
+    return cachedResult;
+  }
 }

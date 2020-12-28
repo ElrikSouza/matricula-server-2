@@ -6,5 +6,6 @@ import { CoursesService } from './courses.service';
   controllers: [CoursesController],
   providers: [CoursesService],
   imports: [CacheModule.register()],
+  exports: [CoursesService],
 })
 export class CoursesModule {}
