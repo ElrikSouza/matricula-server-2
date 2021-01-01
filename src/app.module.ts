@@ -5,6 +5,7 @@ import { StudentVerificationCodeModule } from './student-verification-code/stude
 import { UserAccountModule } from './user-account/user-account.module';
 import { CoursesModule } from './courses/courses.module';
 import { StudentModule } from './student/student.module';
+import { EnrollmentRequestsModule } from './enrollment-requests/enrollment-requests.module';
 import * as Env from './env';
 
 @Module({
@@ -19,6 +20,7 @@ import * as Env from './env';
     }),
     CoursesModule,
     StudentModule,
+    EnrollmentRequestsModule,
   ],
 })
 export class AppModule {}
