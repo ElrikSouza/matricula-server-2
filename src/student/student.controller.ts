@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../auth/jwt/jwt.guard';
 export class StudentController {
   constructor(private coursesService: CoursesService) {}
 
-  @Get(':id/completed-courses')
+  @Get('completed-courses')
   async getCompletedCourses(@StudentId() studentId: number) {
     return this.coursesService.getCompletedCoursesByStudendId(studentId);
   }
