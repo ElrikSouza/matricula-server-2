@@ -6,7 +6,7 @@ import { EnrollmentRequest } from './enrollment-request.entity';
 @Injectable()
 export class EnrollmentRequestsService {
   constructor(
-    @InjectRepository(EnrollmentRequestsService)
+    @InjectRepository(EnrollmentRequest)
     private enrollmentRequestsRepo: Repository<EnrollmentRequest>,
     private entityManager: EntityManager,
   ) {}
@@ -16,7 +16,7 @@ export class EnrollmentRequestsService {
       .query(
         `
         select array(
-            select c.code from enrollment-request e
+            select c.code from enrollment_request e
             inner join course c on e.course_id = c._id where e.student_id = $1
         ) "courseCodes"; 
     `,
@@ -29,7 +29,7 @@ export class EnrollmentRequestsService {
     const codesOfDeletedRequests: Set<string> = await this.entityManager
       .query(
         `
-      select array(delete from enrollment-request where student_id = $1, 
+      select array(delete from enrollment_request where student_id = $1, 
       code in (${courseCodes.map((_, i) => `${i + 2}`)})
       returning code) as codes;
     `,
