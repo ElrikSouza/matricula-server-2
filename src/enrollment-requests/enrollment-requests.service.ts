@@ -11,14 +11,23 @@ export class EnrollmentRequestsService {
     private entityManager: EntityManager,
   ) {}
 
-  async getEnrollmentRequestsByStudentId(studentId: number) {
+  async getRequestedCoursesByStudentId(studentId: number) {
+    const courses = await this.entityManager.query(
+      `
+      select co.name, co.code from course co inner join enrollment_request er
+      on co.code = er.course_code where er.student_id = $1;
+    `,
+      [studentId],
+    );
+
+    return { courses };
+  }
+
+  async getRequestedCoursesCodesByStudentId(studentId: number) {
     return this.entityManager
       .query(
         `
-        select array(
-            select c.code from enrollment_request e
-            inner join course c on e.course_id = c._id where e.student_id = $1
-        ) "courseCodes"; 
+        select array(select course_code from enrollment_request where student_id = $1) as "courseCodes"; 
     `,
         [studentId],
       )
@@ -28,14 +37,14 @@ export class EnrollmentRequestsService {
   async deleteEnrollmentRequests(courseCodes: string[], studentId: number) {
     const codesOfDeletedRequests: Set<string> = await this.entityManager
       .query(
-        `
-      select array(delete from enrollment_request where student_id = $1, 
-      code in (${courseCodes.map((_, i) => `${i + 2}`)})
-      returning code) as codes;
+        `delete from enrollment_request where student_id = $1 and course_code in (${courseCodes.map(
+          (_, i) => `$${i + 2}`,
+        )})
+      returning course_code as codes;
     `,
         [studentId, ...courseCodes],
       )
-      .then(([it]) => new Set(it));
+      .then(([it]) => new Set(it.map((codes) => codes.code)));
 
     const result = {
       deletedRequests: [] as string[],

@@ -1,22 +1,38 @@
-import { Body, Controller, Delete, Get, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt/jwt.guard';
 import { StudentId } from '../auth/jwt/student-id.decorator';
 import { EnrollmentRequestBulkDto } from './enrollment-request-bulk.dto';
 import { EnrollmentRequestsService } from './enrollment-requests.service';
 
-@Controller('enrollment-requests')
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class EnrollmentRequestsController {
   constructor(private enrollmentRequestsService: EnrollmentRequestsService) {}
 
-  @Get()
-  async getEnrollmentRequestsByStudentId(@StudentId() studentId: number) {
-    return this.enrollmentRequestsService.getEnrollmentRequestsByStudentId(
-      studentId,
-    );
+  @Get('enrollment-requests')
+  async getEnrollmentRequestsByStudentId(
+    @StudentId() studentId: number,
+    @Query('codesOnly') codesOnly: boolean,
+  ) {
+    if (codesOnly) {
+      return this.enrollmentRequestsService.getRequestedCoursesCodesByStudentId(
+        studentId,
+      );
+    } else {
+      return this.enrollmentRequestsService.getRequestedCoursesByStudentId(
+        studentId,
+      );
+    }
   }
 
-  @Delete('//:bulk')
+  @Delete('enrollment-requests:bulk')
   async deleteEnrollmentRequests(
     @Body() { courseCodes }: EnrollmentRequestBulkDto,
     @StudentId() studentId: number,

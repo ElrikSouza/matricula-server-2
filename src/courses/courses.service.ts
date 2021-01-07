@@ -14,12 +14,11 @@ export class CoursesService {
 
     if (!cachedResult) {
       const dbResult = await this.entityManager.query(`
-      select
-         a_course.code, a_course.name,
-        array_remove(array_agg(co.code), NULL) as prerequisites
-      from course a_course left join (
-        course_prerequisite co_p inner join course co on co_p.prerequisite_id = co._id
-      ) on a_course._id = co_p.course_id group by a_course._id;`);
+        select co.code, co.name, 
+        array_remove(array_agg(pre.prerequisite_code), NULL) as prerequisites
+        from course co left join course_prerequisite pre
+        on co.code = pre.course_code group by co.code;
+      `);
 
       await this.cacheManager.set(
         'courses',
@@ -42,7 +41,7 @@ export class CoursesService {
         select
         array_agg(co.code) as "courseCodes"
         from course co inner join student_course_record scr
-        on co._id = scr.course_id 
+        on co.code = scr.course_code
         where scr.student_id = $1;
       `,
         [studentId],
