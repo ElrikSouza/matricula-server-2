@@ -18,7 +18,7 @@ async function bootstrap() {
   );
 
   types.setTypeParser(20, Number.parseInt);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   app.register(fastifyHelmet);
   app.register(compress, { encodings: ['gzip', 'deflate'] });
