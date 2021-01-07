@@ -44,7 +44,7 @@ GET /courses
 }
 ```
 
-GET /students/:id/completed-courses
+GET /students/completed-courses
 
 ```typescript
 {
@@ -56,7 +56,7 @@ GET /students/:id/completed-courses
 }
 ```
 
-GET /students/:id/completed-courses?codeOnly=true
+GET /students/completed-courses?codeOnly=true
 
 ```typescript
 {
