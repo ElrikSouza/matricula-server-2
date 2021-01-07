@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -30,6 +31,17 @@ export class EnrollmentRequestsController {
         studentId,
       );
     }
+  }
+
+  @Post('enrollment-requests:bulk')
+  async createEnrollmentRequests(
+    @Body() { courseCodes }: EnrollmentRequestBulkDto,
+    @StudentId() studentId: number,
+  ) {
+    await this.enrollmentRequestsService.createEnrollmentRequests(
+      courseCodes,
+      studentId,
+    );
   }
 
   @Delete('enrollment-requests:bulk')

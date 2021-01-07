@@ -34,6 +34,49 @@ export class EnrollmentRequestsService {
       .then((it) => it[0]);
   }
 
+  async createEnrollmentRequests(courseCodes: string[], studentId: number) {
+    const coursesThatHaveMissingPrerequisites = await this.entityManager.query(
+      `
+      select pre.course_code, array_agg(pre.prerequisite_code) as prerequisites from
+      course_prerequisite pre left join student_course_record rec
+      on rec.student_id = $1 and pre.prerequisite_code = rec.course_code
+      where pre.course_code in (${courseCodes.map(
+        (_, i) => `$${i + 2}`,
+      )}) and student_id = NULL group by pre.course_code;
+    `,
+      [studentId, ...courseCodes],
+    );
+
+    const result = {
+      allowedRequests: [] as string[],
+      blockedRequests: new Set<string>(),
+      missingPrerequisites: new Set<string>(),
+    };
+
+    for (const course of coursesThatHaveMissingPrerequisites) {
+      result.blockedRequests.add(course.course_code);
+      course.prerequisites.forEach((code) =>
+        result.missingPrerequisites.add(code),
+      );
+    }
+
+    for (const code of courseCodes) {
+      if (!result.blockedRequests.has(code)) {
+        result.allowedRequests.push(code);
+      }
+    }
+
+    await this.entityManager.query(
+      `
+      insert into enrollment_request (student_id, course_code) values
+      ${result.allowedRequests.map((_, i) => `($1, $${i + 2})`)};
+    `,
+      [studentId, ...courseCodes],
+    );
+
+    return result;
+  }
+
   async deleteEnrollmentRequests(courseCodes: string[], studentId: number) {
     const codesOfDeletedRequests: Set<string> = await this.entityManager
       .query(
