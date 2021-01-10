@@ -38,10 +38,12 @@ export class EnrollmentRequestsController {
     @Body() { courseCodes }: EnrollmentRequestBulkDto,
     @StudentId() studentId: number,
   ) {
-    await this.enrollmentRequestsService.createEnrollmentRequests(
+    const result = await this.enrollmentRequestsService.createEnrollmentRequests(
       courseCodes,
       studentId,
     );
+
+    return result;
   }
 
   @Delete('enrollment-requests:bulk')

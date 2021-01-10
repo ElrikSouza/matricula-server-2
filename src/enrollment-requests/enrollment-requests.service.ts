@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { genNumberedParams } from 'src/utils/gen-numbered-params';
 import { EntityManager, Repository } from 'typeorm';
 import { EnrollmentRequest } from './enrollment-request.entity';
 
@@ -40,15 +41,14 @@ export class EnrollmentRequestsService {
       select pre.course_code, array_agg(pre.prerequisite_code) as prerequisites from
       course_prerequisite pre left join student_course_record rec
       on rec.student_id = $1 and pre.prerequisite_code = rec.course_code
-      where pre.course_code in (${courseCodes.map(
-        (_, i) => `$${i + 2}`,
-      )}) and student_id = NULL group by pre.course_code;
+      where pre.course_code in (${genNumberedParams(courseCodes.length, 1)}) 
+      and student_id = NULL group by pre.course_code;
     `,
       [studentId, ...courseCodes],
     );
 
     const result = {
-      allowedRequests: [] as string[],
+      acceptedRequests: [] as string[],
       blockedRequests: new Set<string>(),
       missingPrerequisites: new Set<string>(),
     };
@@ -62,14 +62,14 @@ export class EnrollmentRequestsService {
 
     for (const code of courseCodes) {
       if (!result.blockedRequests.has(code)) {
-        result.allowedRequests.push(code);
+        result.acceptedRequests.push(code);
       }
     }
 
     await this.entityManager.query(
       `
       insert into enrollment_request (student_id, course_code) values
-      ${result.allowedRequests.map((_, i) => `($1, $${i + 2})`)};
+      ${result.acceptedRequests.map((_, i) => `($1, $${i + 2})`)};
     `,
       [studentId, ...courseCodes],
     );
@@ -80,10 +80,9 @@ export class EnrollmentRequestsService {
   async deleteEnrollmentRequests(courseCodes: string[], studentId: number) {
     const codesOfDeletedRequests: Set<string> = await this.entityManager
       .query(
-        `delete from enrollment_request where student_id = $1 and course_code in (${courseCodes.map(
-          (_, i) => `$${i + 2}`,
-        )})
-      returning course_code as codes;
+        `delete from enrollment_request where student_id = $1 and course_code
+        in (${genNumberedParams(courseCodes.length, 1)})
+        returning course_code as codes;
     `,
         [studentId, ...courseCodes],
       )
