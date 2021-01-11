@@ -1,16 +1,17 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import { CacheService } from 'src/cache/cache.service';
 import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class CoursesService {
   constructor(
     private entityManager: EntityManager,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private cacheManager: CacheService,
   ) {}
 
   async getCourses() {
-    const cachedResult = await this.cacheManager.get('courses');
+    const cachedResult = await this.cacheManager.getObject('courses');
 
     if (!cachedResult) {
       const dbResult = await this.entityManager.query(`
@@ -20,11 +21,7 @@ export class CoursesService {
         on co.code = pre.course_code group by co.code;
       `);
 
-      await this.cacheManager.set(
-        'courses',
-        { courses: dbResult },
-        { ttl: 3000000 },
-      );
+      await this.cacheManager.setObject('courses', { courses: dbResult });
 
       return { courses: dbResult };
     }
@@ -33,7 +30,9 @@ export class CoursesService {
   }
 
   async getCompletedCoursesByStudendId(studentId: number) {
-    const cachedResult = await this.cacheManager.get(`courses#${studentId}`);
+    const cachedResult = await this.cacheManager.getObject(
+      `courses#${studentId}`,
+    );
 
     if (!cachedResult) {
       const [dbResult] = await this.entityManager.query(
@@ -47,9 +46,7 @@ export class CoursesService {
         [studentId],
       );
 
-      await this.cacheManager.set(`courses#${studentId}`, dbResult, {
-        ttl: 300000,
-      });
+      await this.cacheManager.setObject(`courses#${studentId}`, dbResult);
 
       return dbResult;
     }
